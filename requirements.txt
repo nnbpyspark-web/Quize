@@ -1,2 +1,5 @@
 streamlit>=1.18.0
 gTTS>=2.3.0
+SpeechRecognition
+Pillow
+requests

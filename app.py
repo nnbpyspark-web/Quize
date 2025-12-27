@@ -1,154 +1,149 @@
-# empty file
 import random
 import io
 from gtts import gTTS
 import streamlit as st
+import speech_recognition as sr
+from PIL import Image
+import requests
+from io import BytesIO
 
+st.set_page_config(page_title="QuickQuiz Kids", page_icon="🧒", layout="centered")
 
-st.set_page_config(page_title="QuickQuiz", page_icon=":books:", layout="centered")
+# ------------------ STYLES ------------------
+st.markdown("""
+<style>
+body { background: #eef2ff; }
+.card {
+    background: linear-gradient(135deg, #ffffff, #f0f4ff);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+.title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1e3a8a;
+}
+.correct {
+    background: #dcfce7;
+    color: #166534;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+.wrong {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+</style>
+""", unsafe_allow_html=True)
 
-CSS = """
-body { background-color: #f6f8fb; }
-.card { background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border-radius:12px; padding:24px; box-shadow: 0 8px 24px rgba(17,24,39,0.06); }
-.title { font-weight:700; font-size:22px; }
-.muted { color:#6b7280 }
-"""
-
-st.markdown(f"<style>{CSS}</style>", unsafe_allow_html=True)
-
+# ------------------ QUESTIONS + IMAGES ------------------
 QUESTIONS = [
-	# General Knowledge Questions
-    ("Which animal is known as the \"Ship of the Desert\"?", "Camel"),
-    ("How many legs does a spider have?", "Eight"),
-    ("National river of India?", "Ganga"),
-    ("National reptile of India?", "King Cobra"),
-    ("How many continents are there in the world?", "Seven"),
-    ("Name the biggest continent in the world.", "Asia"),
-    ("The Sun rises in the ________?", "East"),
-    ("Name the largest planet in our Solar System.", "Jupiter"),
-    ("Who is the first woman Prime Minister of India?", "Indira Gandhi"),
-    ("Name the first man to walk on the Moon.", "Neil Armstrong"),
-    ("How many days are there in a year?", "365"),
-    ("How many days are there in a week?", "7"),
-    ("Which month of the year has less days?", "February"),
+    ("Which animal is known as the Ship of the Desert?", "Camel",
+     "https://cdn-icons-png.flaticon.com/512/616/616408.png"),
 
-    # Transportation
-    ("Who drives a vehicle?", "Driver"),
-    ("Who drives a boat?", "Sailor"),
-    ("Who drives a ship?", "Captain"),
-    ("Who drives a train?", "Locomotive pilot"),
-    ("Who flies an airplane?", "Pilot"),
+    ("How many legs does a spider have?", "Eight",
+     "https://cdn-icons-png.flaticon.com/512/616/616430.png"),
 
-    # Animal Facts
-    ("Which is the largest animal in the world?", "Blue Whale"),
-    ("Which animal cannot close its eyes?", "Fish"),
-    ("Which animal can survive without a head?", "Cockroach"),
-    ("Which animal has no heart?", "Jellyfish"),
-    ("Which is the slowest animal in the world?", "Snail / Sloth"),
+    ("National river of India?", "Ganga",
+     "https://cdn-icons-png.flaticon.com/512/684/684908.png"),
 
-    # India - Important G.K.
-    ("When do we celebrate Independence Day?", "15th August"),
-    ("Who is our Prime Minister?", "Narendra Modi"),
-    ("Which is the biggest flower in the world?", "Rafflesia"),
-    ("Which is the tallest animal in the world?", "Giraffe"),
-    ("Which country invented paper?", "China"),
+    ("The Sun rises in the ________?", "East",
+     "https://cdn-icons-png.flaticon.com/512/3222/3222798.png"),
 
-    # Colours
-    ("What are the primary colours?", "Red, Blue, and Yellow"),
-    ("What are the secondary colours?", "Green, Orange, and Purple"),
-    ("How many colours are there in the rainbow?", "Seven"),
-    ("Name the colours in the rainbow?", "VIBGYOR-Violet, Indigo, Blue, Green, Yellow, Orange, Red"),
-    ("What colour do you get when you mix red and blue?", "Purple"),
-
-    # Fruits
-    ("Name few fruits with many seeds?", "Watermelon, Papaya, and Pomegranate"),
-    ("Name a fruit which has one seed?", "Mango, Plum, Cherry"),
-    ("Which fruit is known as the \"king of fruits\"?", "Mango"),
-    ("Which fruit is red in colour and good for the heart?", "Apple"),
-
-    # Vegetables
-    ("Name few underground vegetables?", "Carrot, Potato, and Beetroot"),
-    ("Name few green vegetables?", "Spinach, Cabbage, and Broccoli"),
-    ("Which vegetable is used to make French fries?", "Potato"),
-    ("Which vegetable is long and orange in colour?", "Carrot"),
-    ("Which vegetable looks like a small tree?", "Broccoli"),
-
-    # Body Parts
-    ("How many sense organs do we have?", "Five"),
-    ("Name the 5 sense organs?", "Eyes, Ears, Nose, Tongue, Skin"),
-    ("Which body part helps us smell?", "Nose"),
-    ("Which body part helps us hear sounds?", "Ears"),
-    ("Which body part helps us taste food?", "Tongue"),
-    ("Which body part helps us walk and run?", "Legs"),
-
-    # Shapes
-    ("How many sides does a triangle have?", "Three"),
-    ("Which shape has four equal sides?", "Square"),
-    ("Which shape has no edges?", "Circle"),
+    ("Which is the largest planet?", "Jupiter",
+     "https://cdn-icons-png.flaticon.com/512/3222/3222806.png"),
 ]
 
+# ------------------ HELPERS ------------------
+def speak(text):
+    tts = gTTS(text=text, lang="en")
+    bio = io.BytesIO()
+    tts.write_to_fp(bio)
+    bio.seek(0)
+    st.audio(bio.read(), format="audio/mp3")
 
+def speech_to_text(audio_file):
+    recognizer = sr.Recognizer()
+    with sr.AudioFile(audio_file) as source:
+        audio = recognizer.record(source)
+    try:
+        return recognizer.recognize_google(audio)
+    except:
+        return ""
 
-def generate_tts_bytes(text: str, lang: str = "en") -> bytes:
-	"""Generate mp3 bytes for given text using gTTS."""
-	tts = gTTS(text=text, lang=lang)
-	bio = io.BytesIO()
-	tts.write_to_fp(bio)
-	bio.seek(0)
-	return bio.read()
+def load_image(url):
+    response = requests.get(url)
+    return Image.open(BytesIO(response.content))
 
-
+# ------------------ SESSION ------------------
 if "idx" not in st.session_state:
-	st.session_state.idx = random.randrange(len(QUESTIONS))
-	st.session_state.revealed = False
+    st.session_state.idx = random.randrange(len(QUESTIONS))
+    st.session_state.submitted = False
+    st.session_state.result = ""
 
-
+# ------------------ UI ------------------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.markdown("<div style='display:flex;justify-content:space-between;align-items:center'>", unsafe_allow_html=True)
-st.markdown(f"<div><div class='title'>QuickQuiz</div><div class='muted'>Tap the speaker to hear text</div></div>", unsafe_allow_html=True)
-if st.button("Next Question", key="next"):
-	prev = st.session_state.idx
-	# pick a different random index when possible
-	if len(QUESTIONS) > 1:
-		idx = prev
-		while idx == prev:
-			idx = random.randrange(len(QUESTIONS))
-		st.session_state.idx = idx
-	else:
-		st.session_state.idx = prev
-	st.session_state.revealed = False
+
+header1, header2 = st.columns([8,2])
+with header1:
+    st.markdown("<div class='title'>QuickQuiz Kids 🎉</div>", unsafe_allow_html=True)
+with header2:
+    if st.button("Next ➡️"):
+        st.session_state.idx = random.randrange(len(QUESTIONS))
+        st.session_state.submitted = False
+        st.session_state.result = ""
+
+question, answer, img_url = QUESTIONS[st.session_state.idx]
+
+st.markdown("---")
+
+# ------------------ IMAGE ------------------
+st.image(load_image(img_url), width=200)
+
+# ------------------ QUESTION ------------------
+qcol1, qcol2 = st.columns([8,2])
+with qcol1:
+    st.markdown(f"### {question}")
+with qcol2:
+    if st.button("🔊"):
+        speak(question)
+
+st.markdown("### 🎤 Speak your answer")
+
+audio = st.audio_input("Tap to speak", disabled=st.session_state.submitted)
+
+if audio and not st.session_state.submitted:
+    with open("temp.wav", "wb") as f:
+        f.write(audio.getbuffer())
+
+    user_answer = speech_to_text("temp.wav")
+
+    st.session_state.submitted = True
+
+    if user_answer.lower().strip() == answer.lower():
+        st.session_state.result = "correct"
+    else:
+        st.session_state.result = "wrong"
+
+# ------------------ RESULT ------------------
+if st.session_state.submitted:
+    if st.session_state.result == "correct":
+        st.markdown("<div class='correct'>✅ Correct!</div>", unsafe_allow_html=True)
+    else:
+        st.markdown("<div class='wrong'>❌ Wrong</div>", unsafe_allow_html=True)
+
+    acol1, acol2 = st.columns([8,2])
+    with acol1:
+        st.info(f"📘 Correct Answer: **{answer}**")
+    with acol2:
+        if st.button("🔊 Answer"):
+            speak(answer)
+
 st.markdown("</div>", unsafe_allow_html=True)
 
-q_text, a_text = QUESTIONS[st.session_state.idx]
-
-st.markdown("<hr />", unsafe_allow_html=True)
-
-st.markdown("<div style='display:flex;align-items:center;gap:16px'>", unsafe_allow_html=True)
-col1, col2 = st.columns([8,1])
-with col1:
-	st.markdown(f"### {q_text}")
-with col2:
-	if st.button("🔊", key="q_speak"):
-		audio_bytes = generate_tts_bytes(q_text)
-		st.audio(audio_bytes, format="audio/mp3")
-st.markdown("</div>", unsafe_allow_html=True)
-
-show = st.button("Show Answer", key="show")
-if show:
-	st.session_state.revealed = True
-
-if st.session_state.revealed:
-	st.markdown("<div style='display:flex;align-items:center;gap:16px;margin-top:8px'>", unsafe_allow_html=True)
-	a_col1, a_col2 = st.columns([8,1])
-	with a_col1:
-		st.success(a_text)
-	with a_col2:
-		if st.button("🔊", key="a_speak"):
-			audio_bytes = generate_tts_bytes(a_text)
-			st.audio(audio_bytes, format="audio/mp3")
-	st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("\n---\n\nMade with ♥ using Streamlit. Click `Next Question` for a different item.")
-
+st.caption("🎓 Learn with Fun • Voice Enabled • Kid Friendly")
