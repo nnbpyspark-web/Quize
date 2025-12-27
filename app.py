@@ -43,20 +43,74 @@ body { background: #eef2ff; }
 
 # ------------------ QUESTIONS + IMAGES ------------------
 QUESTIONS = [
-    ("Which animal is known as the Ship of the Desert?", "Camel",
-     "https://cdn-icons-png.flaticon.com/512/616/616408.png"),
+	# General Knowledge Questions
+    ("Which animal is known as the \"Ship of the Desert\"?", "Camel"),
+    ("How many legs does a spider have?", "Eight"),
+    ("National river of India?", "Ganga"),
+    ("National reptile of India?", "King Cobra"),
+    ("How many continents are there in the world?", "Seven"),
+    ("Name the biggest continent in the world.", "Asia"),
+    ("The Sun rises in the ________?", "East"),
+    ("Name the largest planet in our Solar System.", "Jupiter"),
+    ("Who is the first woman Prime Minister of India?", "Indira Gandhi"),
+    ("Name the first man to walk on the Moon.", "Neil Armstrong"),
+    ("How many days are there in a year?", "365"),
+    ("How many days are there in a week?", "7"),
+    ("Which month of the year has less days?", "February"),
 
-    ("How many legs does a spider have?", "Eight",
-     "https://cdn-icons-png.flaticon.com/512/616/616430.png"),
+    # Transportation
+    ("Who drives a vehicle?", "Driver"),
+    ("Who drives a boat?", "Sailor"),
+    ("Who drives a ship?", "Captain"),
+    ("Who drives a train?", "Locomotive pilot"),
+    ("Who flies an airplane?", "Pilot"),
 
-    ("National river of India?", "Ganga",
-     "https://cdn-icons-png.flaticon.com/512/684/684908.png"),
+    # Animal Facts
+    ("Which is the largest animal in the world?", "Blue Whale"),
+    ("Which animal cannot close its eyes?", "Fish"),
+    ("Which animal can survive without a head?", "Cockroach"),
+    ("Which animal has no heart?", "Jellyfish"),
+    ("Which is the slowest animal in the world?", "Snail / Sloth"),
 
-    ("The Sun rises in the ________?", "East",
-     "https://cdn-icons-png.flaticon.com/512/3222/3222798.png"),
+    # India - Important G.K.
+    ("When do we celebrate Independence Day?", "15th August"),
+    ("Who is our Prime Minister?", "Narendra Modi"),
+    ("Which is the biggest flower in the world?", "Rafflesia"),
+    ("Which is the tallest animal in the world?", "Giraffe"),
+    ("Which country invented paper?", "China"),
 
-    ("Which is the largest planet?", "Jupiter",
-     "https://cdn-icons-png.flaticon.com/512/3222/3222806.png"),
+    # Colours
+    ("What are the primary colours?", "Red, Blue, and Yellow"),
+    ("What are the secondary colours?", "Green, Orange, and Purple"),
+    ("How many colours are there in the rainbow?", "Seven"),
+    ("Name the colours in the rainbow?", "VIBGYOR-Violet, Indigo, Blue, Green, Yellow, Orange, Red"),
+    ("What colour do you get when you mix red and blue?", "Purple"),
+
+    # Fruits
+    ("Name few fruits with many seeds?", "Watermelon, Papaya, and Pomegranate"),
+    ("Name a fruit which has one seed?", "Mango, Plum, Cherry"),
+    ("Which fruit is known as the \"king of fruits\"?", "Mango"),
+    ("Which fruit is red in colour and good for the heart?", "Apple"),
+
+    # Vegetables
+    ("Name few underground vegetables?", "Carrot, Potato, and Beetroot"),
+    ("Name few green vegetables?", "Spinach, Cabbage, and Broccoli"),
+    ("Which vegetable is used to make French fries?", "Potato"),
+    ("Which vegetable is long and orange in colour?", "Carrot"),
+    ("Which vegetable looks like a small tree?", "Broccoli"),
+
+    # Body Parts
+    ("How many sense organs do we have?", "Five"),
+    ("Name the 5 sense organs?", "Eyes, Ears, Nose, Tongue, Skin"),
+    ("Which body part helps us smell?", "Nose"),
+    ("Which body part helps us hear sounds?", "Ears"),
+    ("Which body part helps us taste food?", "Tongue"),
+    ("Which body part helps us walk and run?", "Legs"),
+
+    # Shapes
+    ("How many sides does a triangle have?", "Three"),
+    ("Which shape has four equal sides?", "Square"),
+    ("Which shape has no edges?", "Circle"),
 ]
 
 # ------------------ HELPERS ------------------
@@ -98,12 +152,12 @@ with header2:
         st.session_state.submitted = False
         st.session_state.result = ""
 
-question, answer, img_url = QUESTIONS[st.session_state.idx]
+question, answer = QUESTIONS[st.session_state.idx]
 
 st.markdown("---")
 
 # ------------------ IMAGE ------------------
-st.image(load_image(img_url), width=200)
+st.image(load_image('https://cdn-icons-png.flaticon.com/512/3222/3222806.png'), width=200)
 
 # ------------------ QUESTION ------------------
 qcol1, qcol2 = st.columns([8,2])
